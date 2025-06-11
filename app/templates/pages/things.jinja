@@ -40,32 +40,28 @@
     </article>
 
 
-    <article>
+    {% if session.user_id %}
 
-        <h3>Add a New Thing...</h3>
+        <article>
 
-        <form action="/add" method="POST">
+            <h3>Add a New Thing...</h3>
 
-            <input
-                type="text"
-                name="name"
-                placeholder="Name of new thing"
-                required
-            >
+            <form action="/add" method="POST">
 
-            <input
-                type="number"
-                name="price"
-                min="0"
-                placeholder="Price in dollars"
-                required
-            >
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Name of new thing"
+                    required
+                >
 
-            <button>Add the Thing</button>
+                <button>Add the Thing</button>
 
-        </form>
+            </form>
 
-    </article>
+        </article>
+
+    {% endif %}
 
 {% endblock %}
 

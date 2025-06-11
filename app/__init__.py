@@ -105,17 +105,22 @@ def show_one_thing(id):
 def add_a_thing():
     # Get the data from the form
     name  = request.form.get("name")
-    price = request.form.get("price")
+
 
     # Sanitise the inputs
     name = html.escape(name)
-    price = html.escape(price)
 
+
+    #get the user id from the session
+    user_id = session["user_id"]
+    print (user_id)
+   
     with connect_db() as client:
         # Add the thing to the DB
-        sql = "INSERT INTO things (name, price) VALUES (?, ?)"
-        values = [name, price]
+        sql = "INSERT INTO things (name, user_id) VALUES (?, ?)"
+        values = [name, user_id]
         client.execute(sql, values)
+
 
         # Go back to the home page
         flash(f"Thing '{name}' added", "success")
@@ -146,7 +151,7 @@ def add_a_user():
         client.execute(sql, values)
 
         # Go back to the home page
-        flash(f"Thing '{name}' added", "success")
+        flash(f"User '{name}' added", "success")
         return redirect("/")
     
 
@@ -178,9 +183,9 @@ def login_user():
             if check_password_hash(hash, password):
                 # Yes, so we save the details in the session
                 session["user_id"] = user["id"]
-                session["user_id"] = user["name"]
+                session["user_name"] = user["name"]
                 flash("Logged in successfully", "success")
-                redirect("/")
+                return redirect("/")
 
 
         # Go back to the home page
@@ -194,9 +199,12 @@ def login_user():
 @app.get("/delete/<int:id>")
 def delete_a_thing(id):
     with connect_db() as client:
+        # Get our user id from session
+        user_id = session["user_id"]
         # Delete the thing from the DB
-        sql = "DELETE FROM things WHERE id=?"
-        values = [id]
+        # Checking that we are the owner
+        sql = "DELETE FROM things WHERE id=? AND user_id=?"
+        values = [id, user_id]
         client.execute(sql, values)
 
         # Go back to the home page
@@ -204,3 +212,14 @@ def delete_a_thing(id):
         return redirect("/things")
 
 
+#-----------------------------------------------------------
+# Route for user logout
+#-----------------------------------------------------------
+@app.get("/logout")
+def logout():
+    # Clear the session values
+    session.pop("user_id")
+    session.pop("user_name")
+    # Back to the home page
+    flash("You have been logged out!", "success")
+    return redirect("/")
